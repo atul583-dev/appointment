@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment Booking</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+<div class="container">
+    <h1>Book Doctor Appointment</h1>
+
+    <form id="bookingForm">
+        <div class="doctor-cards" id="doctorCards">
+            <div class="doctor-card" onclick="selectDoctor(this)">
+                <input type="radio" name="doctor" value="dr-smith" required hidden>
+                <h3>Dr. Sarah Smith</h3>
+                <p>Cardiologist</p>
+            </div>
+            <div class="doctor-card" onclick="selectDoctor(this)">
+                <input type="radio" name="doctor" value="dr-johnson" required hidden>
+                <!--<img src="https://source.unsplash.com/random/150x150/?doctor" alt="Doctor">-->
+                <h3>Dr. John Johnson</h3>
+                <p>Dermatologist</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="date">Appointment Date:</label>
+            <input type="date" id="date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="time">Preferred Time:</label>
+            <input type="time" id="time" required>
+        </div>
+
+        <button type="submit">Book Appointment</button>
+    </form>
+
+    <div class="confirmation" id="confirmation">
+        <h3>Appointment Booked!</h3>
+        <p id="confirmationDetails"></p>
+    </div>
+
+    <div class="appointments-list">
+        <h2>Your Appointments</h2>
+        <div id="appointments"></div>
+    </div>
+</div>
+
+<script src="/script.js"></script>
+
+</body>
+</html>
