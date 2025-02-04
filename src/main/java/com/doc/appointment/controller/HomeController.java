@@ -10,4 +10,9 @@ public class HomeController {
     public String home() {
         return "index";  // Refers to src/main/resources/templates/index.html
     }
+
+    @GetMapping("/dash")
+    public String dashboard() {
+        return "dashboard";
+    }
 }
