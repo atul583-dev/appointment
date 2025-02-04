@@ -1,6 +1,12 @@
 package com.doc.appointment.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "appointment")
 public class Appointment {
+
+    @Id
     private Long id;
     private String name;
     private String phone;
