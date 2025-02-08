@@ -227,8 +227,8 @@ public class AppointmentBooking {
         if (digits.length() != 4 || !digits.matches("\\d{4}")) {
             return false;
         }
-        int month = Integer.parseInt(digits.substring(0, 2));
-        int day = Integer.parseInt(digits.substring(2, 4));
+        int day = Integer.parseInt(digits.substring(0, 2));
+        int month = Integer.parseInt(digits.substring(2, 4));
         if (month < 1 || month > 12) {
             return false;
         }
