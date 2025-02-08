@@ -24,11 +24,9 @@ public class AppointmentController {
         return ResponseEntity.ok(appointment);
     }
 
-    @GetMapping
-    public List<Appointment> getAllAppointments(@RequestParam(required = false) String doctor) {
-        if (doctor != null) {
-            return appointmentService.getAppointmentsByDoctor(doctor);
-        }
+    @GetMapping("/getAll")
+    public List<Appointment> getAllAppointments() {
+        System.out.println("Called getAll appointment: " + appointmentService.getAllAppointments());
         return appointmentService.getAllAppointments();
     }
 }

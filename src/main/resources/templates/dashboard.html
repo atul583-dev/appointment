@@ -94,14 +94,6 @@
 <div class="container">
     <h1>Doctor's Appointment Dashboard</h1>
 
-    <div class="doctor-select">
-        <select id="doctorSelect" onchange="loadAppointments()">
-            <option value="">Select Doctor</option>
-            <option value="dr-smith">Dr. Sarah Smith (Cardiologist)</option>
-            <option value="dr-johnson">Dr. John Johnson (Dermatologist)</option>
-        </select>
-    </div>
-
     <table class="appointments-table">
         <thead>
         <tr>
@@ -118,81 +110,57 @@
     </table>
 
     <div id="noAppointments" class="no-appointments" style="display: none;">
-        No appointments found for this doctor
+        No appointments found
     </div>
 </div>
 
 <script>
-        // Sample appointments data (would normally come from a database)
-        let appointments = [
-            {
-                id: 1,
-                patientName: "John Doe",
-                phone: "+1 555-123-4567",
-                date: "2023-08-15",
-                time: "10:00",
-                doctor: "dr-smith",
-                status: "upcoming"
-            },
-            {
-                id: 2,
-                patientName: "Jane Smith",
-                phone: "+1 555-987-6543",
-                date: "2023-08-16",
-                time: "14:30",
-                doctor: "dr-smith",
-                status: "completed"
-            },
-            {
-                id: 3,
-                patientName: "Mike Johnson",
-                phone: "+1 555-456-7890",
-                date: "2023-08-17",
-                time: "09:15",
-                doctor: "dr-johnson",
-                status: "upcoming"
-            }
-        ];
-
-        async function loadAppointments() {
-        const doctorSelect = document.getElementById('doctorSelect');
-        const selectedDoctor = doctorSelect.value;
-
+    async function loadAppointments() {
         try {
-            const response = await fetch(`http://localhost:8080/api/appointments?doctor=${selectedDoctor}`);
+            const response = await fetch('http://localhost:8080/api/appointments/getAll');
             const appointments = await response.json();
 
             const appointmentsBody = document.getElementById('appointmentsBody');
+            const noAppointmentsDiv = document.getElementById('noAppointments');
             appointmentsBody.innerHTML = '';
 
-            appointments.forEach(app => {
-                const row = document.createElement('tr');
-                // ... (rest of your rendering logic)
-                / Format date
+            if (!appointments || appointments.length === 0) {
+
+                noAppointmentsDiv.style.display = 'block';
+            } else {
+
+                noAppointmentsDiv.style.display = 'none';
+                appointments.forEach(app => {
+                    const row = document.createElement('tr');
+                    // Create combined date-time object
+                    const appDateTime = new Date(`${app.date}T${app.time}:00`);
+                    const now = new Date();
+
+                    // Determine status based on current time
+                    const status = appDateTime > now ? 'upcoming' : 'completed';
+
+                    // Format date
                     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const formattedDate = new Date(app.date).toLocaleDateString('en-US', dateOptions);
+                    const formattedDate = appDateTime.toLocaleDateString('en-US', dateOptions);
 
                     row.innerHTML = `
-                        <td>${app.patientName}</td>
+                        <td>${app.name}</td>
                         <td>${app.phone}</td>
                         <td>${formattedDate}</td>
                         <td>${app.time}</td>
-                        <td><span class="status ${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span></td>
+                        <td><span class="status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
                     `;
                     appointmentsBody.appendChild(row);
-            });
-
+                });
+            }
         } catch (error) {
             console.error('Error fetching appointments:', error);
+            alert('Error loading appointments. Please try again.');
         }
     }
 
-        // Optional: Load real data from localStorage or API
-        // You can replace the sample data with actual data from your storage
-        // Example using localStorage:
-        // if(localStorage.getItem('appointments')) {
-        //     appointments = JSON.parse(localStorage.getItem('appointments'));
-        // }
-    </script>
+    // Load appointments when page loads
+    document.addEventListener('DOMContentLoaded', loadAppointments);
+</script>
 </body>
 </html>
