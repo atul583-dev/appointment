@@ -5,10 +5,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "appointment")
 public class Appointment {
-
-    @Id
-    private Long id;
+    
     private String name;
+    @Id
     private String phone;
     private String date;
     private String time;
@@ -18,8 +17,8 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Long id, String name, String phone, String date, String time, String doctor) {
-        this.id = id;
+    public Appointment(String name, String phone, String date, String time, String doctor) {
+       
         this.name = name;
         this.phone = phone;
         this.date = date;
@@ -28,14 +27,6 @@ public class Appointment {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -79,8 +70,7 @@ public class Appointment {
     @Override
     public String toString() {
         return "Appointment{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", phone='" + phone + '\'' +
                 ", date='" + date + '\'' +
                 ", time='" + time + '\'' +

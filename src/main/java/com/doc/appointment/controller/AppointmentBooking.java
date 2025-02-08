@@ -4,6 +4,7 @@ import com.doc.appointment.model.Appointment;
 import com.doc.appointment.service.AppointmentService;
 import com.twilio.twiml.VoiceResponse;
 import com.twilio.twiml.voice.Gather;
+import com.twilio.twiml.voice.Redirect;
 import com.twilio.twiml.voice.Say;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,11 +43,10 @@ public class AppointmentBooking {
                                 .build())
                         .action("/handleInput")
                         .build())
-                .say(new Say.Builder("We did not receive any input. Goodbye!")
-                        .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                        .language(Say.Language.EN_IN)
-                        .build())
+                // If no digits are captured, redirect back to the main menu.
+                .redirect(new Redirect.Builder("/").build())
                 .build();
+        System.out.println("Response Accepted");
         return response.toXml();
     }
 
@@ -54,7 +54,8 @@ public class AppointmentBooking {
     public String handleInput(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Menu selection: " + digits);
         if (digits == null) {
-            return buildSayResponse("We did not receive any input. Please try again.");
+            // No input received; re-present the main menu.
+            return handleMenu();
         }
 
         String message;
@@ -66,8 +67,9 @@ public class AppointmentBooking {
             message = "You have chosen to cancel an appointment. Goodbye.";
             return buildSayResponse(message);
         } else {
-            message = "Invalid input. Goodbye.";
-            return buildSayResponse(message);
+            message = "Invalid input. Please try again.";
+            // Re-prompt the main menu if input is invalid.
+            return handleMenu();
         }
     }
 
@@ -75,11 +77,12 @@ public class AppointmentBooking {
     public String collectPhoneNumber(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Collected phone number: " + digits);
         if (digits == null || digits.length() != 10 || !digits.matches("\\d{10}")) {
+            // Re-prompt for a valid 10-digit phone number.
             return buildGatherPhoneNumberResponse("We did not receive a valid 10-digit phone number. Please enter your 10-digit mobile number.", "/collectPhoneNumber");
         }
         appointment.setPhone(digits);
         // Once a valid phone number is captured, ask for the name.
-        String message = "Thank you for providing your phone number. Please say your full name after the beep.";
+        String message = "Thank you for providing your phone number. Please say your full name.";
         return buildGatherSpeechResponse(message, "/collectName");
     }
 
@@ -87,11 +90,11 @@ public class AppointmentBooking {
     public String collectName(@RequestParam(value = "SpeechResult", required = false) String speechResult) {
         System.out.println("Collected name: " + speechResult);
         if (speechResult == null || speechResult.isEmpty()) {
-            return buildGatherSpeechResponse("We did not receive a valid name. Please say your full name after the beep.", "/collectName");
+            // Re-prompt for the caller's name.
+            return buildGatherSpeechResponse("We did not receive a valid name. Please say your full name.", "/collectName");
         }
-        // After a valid name, ask for the appointment date.
         appointment.setName(speechResult);
-        String message = "Thank you " + speechResult + ". Please enter your appointment date in MMDD format, for example, 1231 for December 31.";
+        String message = "Thank you " + speechResult + ". Please enter your appointment date in DDMM format, for example, 1231 for December 31.";
         return buildGatherDateResponse(message, "/collectDate");
     }
 
@@ -99,10 +102,10 @@ public class AppointmentBooking {
     public String collectDate(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Collected appointment date: " + digits);
         if (digits == null || digits.length() != 4 || !digits.matches("\\d{4}") || !isValidDate(digits)) {
-            return buildGatherDateResponse("We did not receive a valid appointment date. Please enter the date in DDMM format, for example, 3112 for December 31.", "/collectDate");
+            // Re-prompt for a valid appointment date.
+            return buildGatherDateResponse("We did not receive a valid appointment date. Please enter the date in DDMM format, for example, 1231 for December 31.", "/collectDate");
         }
         appointment.setDate(convertMMDDtoDDMMYYYY(digits));
-        // Once the date is valid, ask for the appointment time.
         String message = "You have selected appointment date " + digits + ". Now, please enter your preferred appointment time in HHMM format, for example, 0930 for 9:30 AM.";
         return buildGatherResponse(message, "/collectTime");
     }
@@ -111,17 +114,18 @@ public class AppointmentBooking {
     public String collectTime(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Collected appointment time: " + digits);
         if (digits == null || digits.isEmpty() || !isValidTime(digits)) {
+            // Re-prompt for a valid time slot.
             return buildGatherResponse("We did not receive a valid time slot. Please enter your preferred time using 4 digits, like 0930 for 9:30 AM.", "/collectTime");
         }
-        appointment.setTime(digits);
+        appointment.setTime(convertHHMMtoHHMMWithColon(digits));
         String message = "Your appointment is booked for time slot " + digits + ". Thank you for using our service.";
-        appointment.setId(System.currentTimeMillis());
+        appointment.setDoctor("Dr. Atul");
         appointmentService.save(appointment);
-        System.out.println("Appointment booked !");
+        System.out.println("Appointment booked!" + appointment);
         return buildSayResponse(message);
     }
 
-    // Helper method for gathering time input via DTMF (4 digits)
+    // Helper method for gathering time input via DTMF (expects 4 digits for HHMM)
     private String buildGatherResponse(String prompt, String action) {
         System.out.println("Prompt (Time): " + prompt);
         return new VoiceResponse.Builder()
@@ -135,15 +139,13 @@ public class AppointmentBooking {
                         .action(action)
                         .timeout(10)
                         .build())
-                .say(new Say.Builder("We did not receive any input. Goodbye.")
-                        .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                        .language(Say.Language.EN_IN)
-                        .build())
+                // If no input is received, redirect back to the same endpoint.
+                .redirect(new Redirect.Builder(action).build())
                 .build()
                 .toXml();
     }
 
-    // Helper method for gathering date input via DTMF (4 digits in MMDD format)
+    // Helper method for gathering date input via DTMF (expects 4 digits for MMDD)
     private String buildGatherDateResponse(String prompt, String action) {
         System.out.println("Prompt (Date): " + prompt);
         return new VoiceResponse.Builder()
@@ -157,15 +159,12 @@ public class AppointmentBooking {
                         .action(action)
                         .timeout(10)
                         .build())
-                .say(new Say.Builder("We did not receive any input. Goodbye.")
-                        .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                        .language(Say.Language.EN_IN)
-                        .build())
+                .redirect(new Redirect.Builder(action).build())
                 .build()
                 .toXml();
     }
 
-    // Helper method for gathering phone number input via DTMF (10 digits)
+    // Helper method for gathering phone number input via DTMF (expects 10 digits)
     private String buildGatherPhoneNumberResponse(String prompt, String action) {
         System.out.println("Prompt (Phone Number): " + prompt);
         return new VoiceResponse.Builder()
@@ -179,10 +178,7 @@ public class AppointmentBooking {
                         .action(action)
                         .timeout(10)
                         .build())
-                .say(new Say.Builder("We did not receive any input. Goodbye.")
-                        .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                        .language(Say.Language.EN_IN)
-                        .build())
+                .redirect(new Redirect.Builder(action).build())
                 .build()
                 .toXml();
     }
@@ -200,10 +196,7 @@ public class AppointmentBooking {
                                 .language(Say.Language.EN_IN)
                                 .build())
                         .build())
-                .say(new Say.Builder("We did not receive any input. Goodbye.")
-                        .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                        .language(Say.Language.EN_IN)
-                        .build())
+                .redirect(new Redirect.Builder(action).build())
                 .build()
                 .toXml();
     }
@@ -245,13 +238,14 @@ public class AppointmentBooking {
         return true;
     }
 
+    // Converts a date provided in MMDD format to a string in DD-MM-YYYY format.
     public static String convertMMDDtoDDMMYYYY(String mmdd) {
         if (mmdd == null || mmdd.length() != 4) {
             throw new IllegalArgumentException("Input must be in MMDD format (4 digits)");
         }
 
-        String monthStr = mmdd.substring(0, 2);
-        String dayStr = mmdd.substring(2, 4);
+        String dayStr = mmdd.substring(0, 2);
+        String monthStr = mmdd.substring(2, 4);
         int currentYear = Year.now().getValue();
 
         try {
@@ -265,5 +259,16 @@ public class AppointmentBooking {
         } catch (DateTimeException e) {
             throw new IllegalArgumentException("Invalid date: " + mmdd, e);
         }
+    }
+
+    public static String convertHHMMtoHHMMWithColon(String time) {
+        if (time == null || time.length() != 4 || !time.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Time must be a 4-digit string in HHMM format.");
+        }
+        // Extract hours and minutes from the string
+        String hours = time.substring(0, 2);
+        String minutes = time.substring(2, 4);
+        // Concatenate with a colon in between
+        return hours + ":" + minutes;
     }
 }

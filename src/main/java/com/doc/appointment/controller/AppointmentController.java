@@ -19,7 +19,6 @@ public class AppointmentController {
     public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
 
         System.out.println("Booked appointment: " + appointment);
-        appointment.setId(System.currentTimeMillis());
 
         appointmentService.save(appointment);
         return ResponseEntity.ok(appointment);
