@@ -8,4 +8,6 @@ import java.util.List;
 public interface AppointmentRepository extends MongoRepository<Appointment, String> {
     // Custom queries can be defined here
     List<Appointment> findByName(String name);
+
+    List<Appointment> findByDoctor(String doctor);
 }

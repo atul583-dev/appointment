@@ -154,25 +154,21 @@
             }
         ];
 
-        // Load appointments when doctor is selected
-        function loadAppointments() {
-            const doctorSelect = document.getElementById('doctorSelect');
-            const selectedDoctor = doctorSelect.value;
-            const filteredAppointments = appointments.filter(app => app.doctor === selectedDoctor);
+        async function loadAppointments() {
+        const doctorSelect = document.getElementById('doctorSelect');
+        const selectedDoctor = doctorSelect.value;
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/appointments?doctor=${selectedDoctor}`);
+            const appointments = await response.json();
 
             const appointmentsBody = document.getElementById('appointmentsBody');
-            const noAppointments = document.getElementById('noAppointments');
-
             appointmentsBody.innerHTML = '';
 
-            if (filteredAppointments.length === 0) {
-                noAppointments.style.display = 'block';
-            } else {
-                noAppointments.style.display = 'none';
-                filteredAppointments.forEach(app => {
-                    const row = document.createElement('tr');
-
-                    // Format date
+            appointments.forEach(app => {
+                const row = document.createElement('tr');
+                // ... (rest of your rendering logic)
+                / Format date
                     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                     const formattedDate = new Date(app.date).toLocaleDateString('en-US', dateOptions);
 
@@ -184,9 +180,12 @@
                         <td><span class="status ${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span></td>
                     `;
                     appointmentsBody.appendChild(row);
-                });
-            }
+            });
+
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
         }
+    }
 
         // Optional: Load real data from localStorage or API
         // You can replace the sample data with actual data from your storage
