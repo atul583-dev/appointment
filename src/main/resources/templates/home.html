@@ -44,7 +44,7 @@
 
             <div class="form-group">
                 <label for="time">Preferred Time:</label>
-                <input type="time" id="time" required>
+                <input type="time" id="time" required step="1800">
             </div>
 
             <button type="submit">Book Appointment</button>
@@ -55,10 +55,10 @@
             <p id="confirmationDetails"></p>
         </div>
 
-        <div class="appointments-list">
+        <!-- <div class="appointments-list">
             <h2>Your Appointments</h2>
             <div id="appointments"></div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Appointments Section -->
@@ -75,7 +75,7 @@
             </tr>
             </thead>
             <tbody id="appointmentsBody">
-            <!-- Appointments will be loaded here -->
+
             </tbody>
         </table>
         <div id="noAppointments" class="no-appointments" style="display: none;">

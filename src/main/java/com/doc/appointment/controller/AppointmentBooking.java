@@ -1,5 +1,6 @@
 package com.doc.appointment.controller;
 
+import com.doc.appointment.AppointmentUtils;
 import com.doc.appointment.model.Appointment;
 import com.doc.appointment.service.AppointmentService;
 import com.twilio.twiml.VoiceResponse;
@@ -11,10 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 @RestController
@@ -81,44 +78,75 @@ public class AppointmentBooking {
             return buildGatherPhoneNumberResponse("We did not receive a valid 10-digit phone number. Please enter your 10-digit mobile number.", "/collectPhoneNumber");
         }
         appointment.setPhone(digits);
-        // Once a valid phone number is captured, ask for the name.
-        String message = "Thank you for providing your phone number. Please say your full name.";
+        Appointment apt = appointmentService.findByPhone(digits);
+        String message = "";
+        if(apt != null) {
+            String name = apt.getName();
+            appointment.setName(name);
+            message = "Thank you " + name + ". Please enter your appointment date in DDMM format, for example, 1231 for December 31.";
+            return buildGatherDateResponse(message, "/collectDate");
+        } else {
+            message = "Thank you for providing your phone number. Please say your full name.";
+        }
         return buildGatherSpeechResponse(message, "/collectName");
     }
 
     @PostMapping(value = "/collectName", produces = "application/xml")
     public String collectName(@RequestParam(value = "SpeechResult", required = false) String speechResult) {
         System.out.println("Collected name: " + speechResult);
-        if (speechResult == null || speechResult.isEmpty()) {
-            // Re-prompt for the caller's name.
-            return buildGatherSpeechResponse("We did not receive a valid name. Please say your full name.", "/collectName");
+
+        // Clean and validate the captured name.
+        String cleanedName = (speechResult != null) ? speechResult.trim() : "";
+        if (cleanedName.isEmpty() || !cleanedName.matches(".*[a-zA-Z]+.*")) {
+            // Log the fact that we didn't receive valid speech input.
+            System.out.println("No valid name received. Re-prompting...");
+            return buildGatherSpeechResponse(
+                    "We did not receive a valid name. Please say your full name, including your first and last name.",
+                    "/collectName"
+            );
         }
-        appointment.setName(speechResult);
-        String message = "Thank you " + speechResult + ". Please enter your appointment date in DDMM format, for example, 1231 for December 31.";
+
+        appointment.setName(cleanedName);
+        String message = "Thank you " + cleanedName + ". Please enter your appointment date in DDMM format, for example, 1231 for December 31.";
         return buildGatherDateResponse(message, "/collectDate");
     }
 
     @PostMapping(value = "/collectDate", produces = "application/xml")
     public String collectDate(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Collected appointment date: " + digits);
-        if (digits == null || digits.length() != 4 || !digits.matches("\\d{4}") || !isValidDate(digits)) {
+        if (digits == null || digits.length() != 4 || !digits.matches("\\d{4}") || !AppointmentUtils.isValidDate(digits)) {
             // Re-prompt for a valid appointment date.
             return buildGatherDateResponse("We did not receive a valid appointment date. Please enter the date in DDMM format, for example, 1231 for December 31.", "/collectDate");
         }
-        appointment.setDate(convertMMDDtoDDMMYYYY(digits));
-        String message = "You have selected appointment date " + digits + ". Now, please enter your preferred appointment time in HHMM format, for example, 0930 for 9:30 AM.";
+        System.out.println("Date: " + AppointmentUtils.convertDate(digits));
+        appointment.setDate(AppointmentUtils.convertDate(digits));
+        String message = "You have selected appointment date " + AppointmentUtils.convertDateToWords(AppointmentUtils.convertDate(digits)) + ". Now, please enter your preferred appointment time in HHMM format, for example, 0930 for 9:30 AM.";
         return buildGatherResponse(message, "/collectTime");
     }
 
     @PostMapping(value = "/collectTime", produces = "application/xml")
     public String collectTime(@RequestParam(value = "Digits", required = false) String digits) {
         System.out.println("Collected appointment time: " + digits);
-        if (digits == null || digits.isEmpty() || !isValidTime(digits)) {
+        if (digits == null || digits.isEmpty() || !AppointmentUtils.isValidTime(digits)) {
             // Re-prompt for a valid time slot.
             return buildGatherResponse("We did not receive a valid time slot. Please enter your preferred time using 4 digits, like 0930 for 9:30 AM.", "/collectTime");
         }
-        appointment.setTime(convertHHMMtoHHMMWithColon(digits));
-        String message = "Your appointment is booked for time slot " + digits + ". Thank you for using our service.";
+        // Convert and set the appointment time
+        appointment.setTime(AppointmentUtils.convertHHMMtoHHMMWithColon(digits));
+        System.out.println("Checking if slot is available");
+
+        // Check if the desired slot is available
+        boolean isAvailable = appointmentService.isSlotAvailable(appointment.getDate(), appointment.getTime());
+        System.out.println("Is slot available: " + isAvailable);
+
+        // If the slot is not available, prompt the user to select another time slot.
+        if (!isAvailable) {
+            return buildGatherResponse("Slot is already booked, please select another time slot.", "/collectTime");
+        }
+
+        // Slot is available; proceed to book the appointment.
+        String message = "Your appointment is booked for " + AppointmentUtils.convertDateToWords(appointment.getDate()) +
+                ", at " + AppointmentUtils.convertTimeToWords(digits) + ". Thank you for using our service.";
         appointment.setDoctor("Dr. Atul");
         appointmentService.save(appointment);
         System.out.println("Appointment booked!" + appointment);
@@ -189,11 +217,15 @@ public class AppointmentBooking {
         return new VoiceResponse.Builder()
                 .gather(new Gather.Builder()
                         .inputs(Arrays.asList(Gather.Input.SPEECH))
+                        .hints("John, Jane, Michael, Sarah, David, Emily")  // Hints can help the recognizer
+                        // Optionally comment out enhanced and speechTimeout for troubleshooting:
+                        // .enhanced(true)
+                        // .speechTimeout("auto")
                         .action(action)
                         .timeout(10)
                         .say(new Say.Builder(prompt)
                                 .voice(Say.Voice.GOOGLE_EN_IN_NEURAL2_C)
-                                .language(Say.Language.EN_IN)
+                                .language(Say.Language.EN_IN)  // Use "en-IN" (or try "en-US" if appropriate)
                                 .build())
                         .build())
                 .redirect(new Redirect.Builder(action).build())
@@ -210,65 +242,5 @@ public class AppointmentBooking {
                         .build())
                 .build()
                 .toXml();
-    }
-
-    // Validates a 4-digit time in HHMM format.
-    private boolean isValidTime(String digits) {
-        if (digits.length() != 4 || !digits.matches("\\d{4}")) {
-            return false;
-        }
-        int hour = Integer.parseInt(digits.substring(0, 2));
-        int minute = Integer.parseInt(digits.substring(2, 4));
-        return (hour >= 0 && hour <= 23) && (minute >= 0 && minute <= 59);
-    }
-
-    // Validates a 4-digit date in MMDD format.
-    private boolean isValidDate(String digits) {
-        if (digits.length() != 4 || !digits.matches("\\d{4}")) {
-            return false;
-        }
-        int day = Integer.parseInt(digits.substring(0, 2));
-        int month = Integer.parseInt(digits.substring(2, 4));
-        if (month < 1 || month > 12) {
-            return false;
-        }
-        if (day < 1 || day > 31) {  // A simple check; you might want to add further validation.
-            return false;
-        }
-        return true;
-    }
-
-    // Converts a date provided in MMDD format to a string in DD-MM-YYYY format.
-    public static String convertMMDDtoDDMMYYYY(String mmdd) {
-        if (mmdd == null || mmdd.length() != 4) {
-            throw new IllegalArgumentException("Input must be in MMDD format (4 digits)");
-        }
-
-        String dayStr = mmdd.substring(0, 2);
-        String monthStr = mmdd.substring(2, 4);
-        int currentYear = Year.now().getValue();
-
-        try {
-            int month = Integer.parseInt(monthStr);
-            int day = Integer.parseInt(dayStr);
-            LocalDate date = LocalDate.of(currentYear, month, day);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            return date.format(formatter);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid month or day format", e);
-        } catch (DateTimeException e) {
-            throw new IllegalArgumentException("Invalid date: " + mmdd, e);
-        }
-    }
-
-    public static String convertHHMMtoHHMMWithColon(String time) {
-        if (time == null || time.length() != 4 || !time.matches("\\d{4}")) {
-            throw new IllegalArgumentException("Time must be a 4-digit string in HHMM format.");
-        }
-        // Extract hours and minutes from the string
-        String hours = time.substring(0, 2);
-        String minutes = time.substring(2, 4);
-        // Concatenate with a colon in between
-        return hours + ":" + minutes;
     }
 }

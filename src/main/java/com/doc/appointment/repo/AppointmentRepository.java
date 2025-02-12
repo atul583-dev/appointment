@@ -10,4 +10,8 @@ public interface AppointmentRepository extends MongoRepository<Appointment, Stri
     List<Appointment> findByName(String name);
 
     List<Appointment> findByDoctor(String doctor);
+
+    Appointment findByPhone(String phone);
+
+    boolean existsByDateAndTime(String date, String time);
 }

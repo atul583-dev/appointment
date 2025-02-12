@@ -25,4 +25,14 @@ public class AppointmentService {
     public List<Appointment> getAppointmentsByDoctor(String doctor) {
         return appointmentRepository.findByDoctor(doctor);
     }
+
+    public Appointment findByPhone(String phone) {
+        return appointmentRepository.findByPhone(phone);
+    }
+
+    public boolean isSlotAvailable(String date, String time) {
+        System.out.println("Date : " + date);
+        System.out.println("Time : " + time);
+        return !appointmentRepository.existsByDateAndTime(date, time);
+    }
 }

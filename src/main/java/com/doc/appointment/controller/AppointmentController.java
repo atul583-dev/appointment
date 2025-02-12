@@ -20,6 +20,9 @@ public class AppointmentController {
 
         System.out.println("Booked appointment: " + appointment);
 
+        System.out.println("Checking if slot is available");
+        System.out.println("Is slot available: " + appointmentService.isSlotAvailable(appointment.getDate(), appointment.getTime()));
+
         appointmentService.save(appointment);
         return ResponseEntity.ok(appointment);
     }

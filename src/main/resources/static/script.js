@@ -30,7 +30,7 @@ let appointments = [];
         };
 
         // API Call
-        fetch('http://localhost:8080/api/appointments', {
+        fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ let appointments = [];
 
     async function loadAppointments() {
         try {
-            const response = await fetch('http://localhost:8080/api/appointments/getAll');
+            const response = await fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments/getAll');
             const appointments = await response.json();
             const tbody = document.getElementById('appointmentsBody');
             const noAppointments = document.getElementById('noAppointments');
@@ -102,12 +102,12 @@ let appointments = [];
                     const appDateTime = new Date(`${app.date}T${app.time}:00`);
                     const now = new Date();
                     const status = appDateTime > now ? 'upcoming' : 'completed';
-                    const formattedDate = appDateTime.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
+
+                    // Get date components and format as dd-MM-yyyy
+                    const day = String(appDateTime.getDate()).padStart(2, '0');
+                    const month = String(appDateTime.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+                    const year = appDateTime.getFullYear();
+                    const formattedDate = `${day}-${month}-${year}`;
 
                     row.innerHTML = `
                         <td>${app.name}</td>
