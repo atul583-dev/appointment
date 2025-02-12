@@ -1,4 +1,4 @@
-package com.doc.appointment;
+package com.doc.appointment.utils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

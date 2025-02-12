@@ -1,6 +1,6 @@
 package com.doc.appointment.controller;
 
-import com.doc.appointment.AppointmentUtils;
+import com.doc.appointment.utils.AppointmentUtils;
 import com.doc.appointment.model.Appointment;
 import com.doc.appointment.service.AppointmentService;
 import com.twilio.twiml.VoiceResponse;
