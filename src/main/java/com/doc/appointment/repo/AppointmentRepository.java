@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface AppointmentRepository extends MongoRepository<Appointment, String> {
-    // Custom queries can be defined here
+
     List<Appointment> findByName(String name);
 
     List<Appointment> findByDoctor(String doctor);
@@ -14,4 +14,6 @@ public interface AppointmentRepository extends MongoRepository<Appointment, Stri
     Appointment findByPhone(String phone);
 
     boolean existsByDateAndTime(String date, String time);
+
+    void deleteByPhone(String phone);
 }

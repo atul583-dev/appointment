@@ -2,6 +2,7 @@ package com.doc.appointment.service;
 
 import com.doc.appointment.model.Appointment;
 import com.doc.appointment.repo.AppointmentRepository;
+import com.doc.appointment.utils.AppointmentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,9 @@ public class AppointmentService {
     private AppointmentRepository appointmentRepository;
 
     public Appointment save(Appointment appointment) {
-        System.out.println("Saving");
+
+        appointment.setStatus(AppointmentUtils.getStatus(appointment.getDate(), appointment.getTime()));
+        System.out.println("Saving An Appointment : " + appointment);
         return appointmentRepository.save(appointment);
     }
 
@@ -34,5 +37,9 @@ public class AppointmentService {
         System.out.println("Date : " + date);
         System.out.println("Time : " + time);
         return !appointmentRepository.existsByDateAndTime(date, time);
+    }
+
+    public void cancelAppointment(String phone) {
+        appointmentRepository.deleteByPhone(phone);
     }
 }

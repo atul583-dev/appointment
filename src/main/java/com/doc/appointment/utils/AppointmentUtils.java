@@ -1,6 +1,7 @@
 package com.doc.appointment.utils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -144,5 +145,13 @@ public class AppointmentUtils {
         } else {
             return tens[num / 10] + (num % 10 != 0 ? "-" + ones[num % 10] : "");
         }
+    }
+
+    public static String getStatus(String date, String time) throws DateTimeParseException {
+        String dateTimeStr = date + " " + time;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime targetDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return targetDateTime.isBefore(currentDateTime) ? "Completed" : "Upcoming";
     }
 }

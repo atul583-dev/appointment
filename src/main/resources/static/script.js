@@ -30,18 +30,32 @@ let appointments = [];
         };
 
         // API Call
-        fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments', {
+        fetch('http://localhost:8080/api/appointments', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(appointment)
         })
         .then(response => {
-            if (!response.ok) throw new Error('Failed to book appointment');
+            // Handle HTTP errors first
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                });
+            }
+
+            // Handle empty responses
+            if (response.status === 204) return null;
+
+            // Verify JSON content
+            const contentType = response.headers.get('content-type');
+            if (!contentType?.includes('application/json')) {
+                throw new TypeError('Expected JSON response');
+            }
+
             return response.json();
         })
         .then(data => {
+            // Success handling
             appointments.push(data);
             showConfirmation(data);
             updateAppointmentsList();
@@ -53,7 +67,7 @@ let appointments = [];
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while booking the appointment.');
+            alert(error.message || 'An error occurred while booking the appointment.');
         });
     });
 
@@ -87,7 +101,7 @@ let appointments = [];
 
     async function loadAppointments() {
         try {
-            const response = await fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments/getAll');
+            const response = await fetch('http://localhost:8080/api/appointments/getAll');
             const appointments = await response.json();
             const tbody = document.getElementById('appointmentsBody');
             const noAppointments = document.getElementById('noAppointments');
@@ -121,21 +135,27 @@ let appointments = [];
             }
         } catch (error) {
             console.error('Error loading appointments:', error);
-            alert('Error loading appointments. Please try again.');
+            //alert('Error loading appointments. Please try again.');
         }
     }
 
     function showSection(sectionId) {
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
-        });
-        const activeSection = document.getElementById(`${sectionId}Section`);
-        activeSection.classList.add('active');
+            // Update tabs
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
 
-        if (sectionId === 'appointments') {
-            loadAppointments();
+            // Update sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${sectionId}Section`).classList.add('active');
+
+            // Load content if needed
+            if (sectionId === 'appointments') loadAppointments();
+            if (sectionId === 'search') document.getElementById('searchPhone').focus();
         }
-    }
 
     // Initial setup
     document.addEventListener("DOMContentLoaded", function() {
@@ -143,3 +163,60 @@ let appointments = [];
         document.getElementById("date").setAttribute("min", today);
         updateAppointmentsList();
     });
+
+function searchAppointments() {
+    const phone = document.getElementById('searchPhone').value.trim();
+    const resultsContainer = document.getElementById('searchResults');
+
+    if (!phone) {
+        alert('Please enter a phone number');
+        return;
+    }
+
+    resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
+
+    fetch(`http://localhost:8080/api/appointments/search?phone=${encodeURIComponent(phone)}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(appointment => {
+            resultsContainer.innerHTML = '';
+
+            if (!appointment) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        No appointment found for this phone number
+                    </div>
+                `;
+                return;
+            }
+
+            const appDateTime = new Date(`${appointment.date}T${appointment.time}:00`);
+            const now = new Date();
+            const status = appDateTime > now ? 'Upcoming' : 'Completed';
+            const formattedDate = new Date(appointment.date).toLocaleDateString('en-GB');
+
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+                <h4>${appointment.name}</h4>
+                <div class="details">
+                    <p>Doctor: ${appointment.doctor.replace('dr-', 'Dr. ').replace('-', ' ').toUpperCase()}</p>
+                    <p>Date: ${formattedDate}</p>
+                    <p>Time: ${appointment.time}</p>
+                    <p>Status: <span class="status">${status}</span></p>
+                </div>
+            `;
+
+            resultsContainer.appendChild(resultItem);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultsContainer.innerHTML = `
+                <div class="error">
+                    Error searching appointment: ${error.message}
+                </div>
+            `;
+        });
+}

@@ -12,18 +12,20 @@ public class Appointment {
     private String date;
     private String time;
     private String doctor;
+    private String status;
 
     // Constructors
     public Appointment() {
     }
 
-    public Appointment(String name, String phone, String date, String time, String doctor) {
+    public Appointment(String name, String phone, String date, String time, String doctor, String status) {
        
         this.name = name;
         this.phone = phone;
         this.date = date;
         this.time = time;
         this.doctor = doctor;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -67,6 +69,14 @@ public class Appointment {
         this.doctor = doctor;
     }
 
+    public String geStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Appointment{" +
@@ -75,6 +85,7 @@ public class Appointment {
                 ", date='" + date + '\'' +
                 ", time='" + time + '\'' +
                 ", doctor='" + doctor + '\'' +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

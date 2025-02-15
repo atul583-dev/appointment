@@ -32,5 +32,11 @@ public class AppointmentController {
         System.out.println("Called getAll appointment: " + appointmentService.getAllAppointments());
         return appointmentService.getAllAppointments();
     }
+
+    @GetMapping("/search")
+    public Appointment searchAppointments(String phone) {
+        System.out.println("Searching an appointment " + appointmentService.findByPhone(phone));
+        return appointmentService.findByPhone(phone);
+    }
 }
 

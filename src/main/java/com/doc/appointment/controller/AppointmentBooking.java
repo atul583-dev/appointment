@@ -61,8 +61,8 @@ public class AppointmentBooking {
             message = "You have chosen to book an appointment. Please enter your 10-digit mobile number.";
             return buildGatherPhoneNumberResponse(message, "/collectPhoneNumber");
         } else if ("2".equals(digits)) {
-            message = "You have chosen to cancel an appointment. Goodbye.";
-            return buildSayResponse(message);
+            message = "You have chosen to cancel an appointment. Please enter your 10-digit mobile number.";
+            return buildGatherPhoneNumberResponse(message, "/cancelCollectPhoneNumber");
         } else {
             message = "Invalid input. Please try again.";
             // Re-prompt the main menu if input is invalid.
@@ -242,5 +242,23 @@ public class AppointmentBooking {
                         .build())
                 .build()
                 .toXml();
+    }
+
+    @PostMapping(value = "/cancelCollectPhoneNumber", produces = "application/xml")
+    public String cancelCollectPhoneNumber(@RequestParam(value = "Digits", required = false) String digits) {
+        System.out.println("Cancel appointment phone number: " + digits);
+        if (digits == null || digits.length() != 10 || !digits.matches("\\d{10}")) {
+            return buildGatherPhoneNumberResponse("We did not receive a valid 10-digit phone number. Please enter your 10-digit mobile number.", "/cancelCollectPhoneNumber");
+        }
+
+        Appointment existingAppointment = appointmentService.findByPhone(digits);
+        if (existingAppointment != null) {
+            appointmentService.cancelAppointment(digits);
+            String message = "Your appointment has been successfully canceled. Thank you.";
+            return buildSayResponse(message);
+        } else {
+            String message = "No appointment found with the provided phone number. Goodbye.";
+            return buildSayResponse(message);
+        }
     }
 }

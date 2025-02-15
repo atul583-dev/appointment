@@ -10,8 +10,9 @@
 <body>
 <div class="container">
     <div class="nav-container">
-        <button class="nav-button" onclick="showSection('booking')">Book Appointment</button>
+        <button class="nav-button active" onclick="showSection('booking')">Book Appointment</button>
         <button class="nav-button" onclick="showSection('appointments')">View Appointments</button>
+        <button class="nav-button" onclick="showSection('search')">Search Appointments</button>
     </div>
 
     <!-- Booking Section -->
@@ -80,6 +81,18 @@
         </table>
         <div id="noAppointments" class="no-appointments" style="display: none;">
             No appointments found
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div id="searchSection" class="section">
+        <h1>Search Appointments</h1>
+        <div class="search-container">
+            <input type="tel" id="searchPhone" placeholder="Enter phone number">
+            <button class="search-button" onclick="searchAppointments()">Search</button>
+        </div>
+        <div id="searchResults" class="search-results">
+            <!-- Results will be inserted here -->
         </div>
     </div>
 </div>

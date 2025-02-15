@@ -3,59 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Appointment Booking</title>
-
+    <title>Doctor Appointment System</title>
     <link rel="stylesheet" href="/style.css">
-
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="container">
-    <h1>Book Doctor Appointment</h1>
-
-    <form id="bookingForm">
-        <div class="doctor-cards" id="doctorCards">
-            <div class="doctor-card" onclick="selectDoctor(this)">
-                <input type="radio" name="doctor" value="dr-atul" required hidden>
-                <h3>Dr. Atul</h3>
-                <p>Cardiologist</p>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" required>
-        </div>
-
-        <div class="form-group">
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" required>
-        </div>
-
-        <div class="form-group">
-            <label for="date">Appointment Date:</label>
-            <input type="date" id="date" required>
-        </div>
-
-        <div class="form-group">
-            <label for="time">Preferred Time:</label>
-            <input type="time" id="time" required>
-        </div>
-
-        <button type="submit">Book Appointment</button>
-    </form>
-
-    <div class="confirmation" id="confirmation">
-        <h3>Appointment Booked!</h3>
-        <p id="confirmationDetails"></p>
+    <div class="nav-container">
+        <button class="nav-button" onclick="showSection('booking')">Book Appointment</button>
+        <button class="nav-button" onclick="showSection('appointments')">View Appointments</button>
+        <button class="nav-button" onclick="showSection('search')">Search Appointments</button>
     </div>
 
-    <div class="appointments-list">
-        <h2>Your Appointments</h2>
-        <div id="appointments"></div>
+    <!-- Booking Section -->
+    <div id="bookingSection" class="section active">
+        <h1>Book Doctor Appointment</h1>
+        <form id="bookingForm" onsubmit="handleBooking(event)">
+            <div class="doctor-cards" id="doctorCards">
+                <div class="doctor-card" onclick="selectDoctor(this)">
+                    <input type="radio" name="doctor" value="dr-atul" required hidden>
+                    <h3>Dr. Atul</h3>
+                    <p>Cardiologist</p>
+                </div>
+                <!-- Add more doctors as needed -->
+            </div>
+
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Appointment Date:</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="time">Preferred Time:</label>
+                <input type="time" id="time" required step="1800">
+            </div>
+
+            <button type="submit">Book Appointment</button>
+            <button type="button" class="danger-btn" onclick="cancelEdit()" style="display: none;" id="cancelEdit">Cancel Edit</button>
+        </form>
+
+        <div class="confirmation" id="confirmation">
+            <h3>Appointment Booked!</h3>
+            <p id="confirmationDetails"></p>
+        </div>
+    </div>
+
+    <!-- Appointments Section -->
+    <div id="appointmentsSection" class="section">
+        <h1>Your Appointments</h1>
+        <div class="search-section">
+            <div class="search-box">
+                <input type="tel" id="searchPhone" placeholder="Search by phone number">
+                <button onclick="searchAppointments()">Search</button>
+            </div>
+        </div>
+        <table class="appointments-table">
+            <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Contact</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="appointmentsBody"></tbody>
+        </table>
+        <div id="noAppointments" class="no-appointments" style="display: none;">
+            No appointments found
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div id="searchSection" class="section">
+        <h1>Search Appointments</h1>
+        <div class="search-box">
+            <input type="tel" id="searchInput" placeholder="Enter phone number">
+            <button onclick="searchAllAppointments()">Search</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
     </div>
 </div>
 
-<script src="/script.js"></script>
+<script>
+    let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+    let editingId = null;
 
+    // Section visibility handling
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId + 'Section').classList.add('active');
+    }
+
+    // Doctor selection
+    function selectDoctor(card) {
+        document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        card.querySelector('input').checked = true;
+    }
+
+    // Form handling
+    function handleBooking(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+
+        const appointment = {
+            id: editingId || Date.now(),
+            doctor: formData.get('doctor'),
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            date: document.getElementById('date').value,
+            time: document.getElementById('time').value,
+            status: 'Booked'
+        };
+
+        if (editingId) {
+            const index = appointments.findIndex(a => a.id === editingId);
+            appointments[index] = appointment;
+        } else {
+            appointments.push(appointment);
+        }
+
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        renderAppointments();
+        event.target.reset();
+        editingId = null;
+        document.getElementById('cancelEdit').style.display = 'none';
+        showSection('appointments');
+    }
+
+    // Appointment rendering
+    function renderAppointments(filtered = appointments) {
+        const tbody = document.getElementById('appointmentsBody');
+        tbody.innerHTML = '';
+
+        filtered.forEach(appointment => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${appointment.name}</td>
+                <td>${appointment.phone}</td>
+                <td>${appointment.doctor}</td>
+                <td>${appointment.date}</td>
+                <td>${appointment.time}</td>
+                <td class="appointment-actions">
+                    <button class="edit-btn" onclick="editAppointment(${appointment.id})">Edit</button>
+                    <button class="danger-btn" onclick="cancelAppointment(${appointment.id})">Cancel</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById('noAppointments').style.display =
+            filtered.length === 0 ? 'block' : 'none';
+    }
+
+    // Search functionality
+    function searchAppointments() {
+        const phone = document.getElementById('searchPhone').value;
+        const filtered = appointments.filter(a => a.phone.includes(phone));
+        renderAppointments(filtered);
+    }
+
+    function searchAllAppointments() {
+        const phone = document.getElementById('searchInput').value;
+        const results = appointments.filter(a => a.phone.includes(phone));
+        const resultsDiv = document.getElementById('searchResults');
+
+        resultsDiv.innerHTML = results.length === 0 ?
+            '<div class="no-appointments">No appointments found</div>' :
+            results.map(a => `
+                <div class="appointment-item">
+                    <div>${a.name} - ${a.doctor}</div>
+                    <div>${a.date} ${a.time}</div>
+                    <div class="appointment-actions">
+                        <button class="edit-btn" onclick="editAppointment(${a.id})">Edit</button>
+                        <button class="danger-btn" onclick="cancelAppointment(${a.id})">Cancel</button>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    // Edit/Cancel functionality
+    function editAppointment(id) {
+        const appointment = appointments.find(a => a.id === id);
+        document.getElementById('name').value = appointment.name;
+        document.getElementById('phone').value = appointment.phone;
+        document.getElementById('date').value = appointment.date;
+        document.getElementById('time').value = appointment.time;
+        editingId = id;
+        document.getElementById('cancelEdit').style.display = 'inline-block';
+        showSection('booking');
+    }
+
+    function cancelEdit() {
+        document.getElementById('bookingForm').reset();
+        editingId = null;
+        document.getElementById('cancelEdit').style.display = 'none';
+    }
+
+    function cancelAppointment(id) {
+        appointments = appointments.filter(a => a.id !== id);
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        renderAppointments();
+        document.getElementById('searchResults').innerHTML = '';
+    }
+
+    // Initial render
+    renderAppointments();
+</script>
 </body>
 </html>
