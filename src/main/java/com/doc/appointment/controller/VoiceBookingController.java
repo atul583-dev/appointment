@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 
 @RestController
-public class AppointmentBooking {
+public class VoiceBookingController {
 
     @Autowired
     private AppointmentService appointmentService;
