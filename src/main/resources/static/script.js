@@ -79,19 +79,21 @@ function showConfirmation(appointment) {
 
 function updateAppointmentsList() {
   const appointmentsDiv = document.getElementById('appointments');
-  appointmentsDiv.innerHTML =
-    appointments.length === 0
-      ? '<p>No appointments booked yet</p>'
-      : appointments
-          .map(
-            app => `
-      <div class="appointment-item" style="padding: 10px; margin: 10px 0; border-bottom: 1px solid #eee;">
-        <p><strong>${app.name}</strong> with ${formatDoctor(app.doctor)}</p>
-        <p>${new Date(app.date).toLocaleDateString()} at ${app.time}</p>
-      </div>
-    `
-          )
-          .join('');
+
+  // Add null check
+  if (!appointmentsDiv) {
+    console.error("Could not find element with id 'appointments'");
+    return;
+  }
+
+  appointmentsDiv.innerHTML = appointments.length === 0
+    ? '<p>No appointments booked yet</p>'
+    : appointments.map(app => `
+        <div class="appointment-item">
+          <p><strong>${app.name}</strong> with ${formatDoctor(app.doctor)}</p>
+          <p>${new Date(app.date).toLocaleDateString()} at ${app.time}</p>
+        </div>
+      `).join('');
 }
 
 async function loadAppointments() {
