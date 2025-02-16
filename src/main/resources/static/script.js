@@ -96,7 +96,7 @@ function updateAppointmentsList() {
 
 async function loadAppointments() {
   try {
-    const response = await fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments/getAll');
+    const response = await fetch('https://www.zaptobook.com/api/appointments/getAll');
     const data = await response.json();
     const tbody = document.getElementById('appointmentsBody');
     const noAppointments = document.getElementById('noAppointments');
@@ -154,7 +154,7 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
 
   const appointment = { id: Date.now(), name, phone, date, time, doctor };
 
-  fetch('https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments', {
+  fetch('https://www.zaptobook.com/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(appointment)
@@ -195,7 +195,7 @@ function searchAppointments() {
   resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
 
   fetch(
-    `https://appointment-app583-cnbkfafwhtggdqc7.canadacentral-01.azurewebsites.net/api/appointments/search?phone=${encodeURIComponent(
+    `https://www.zaptobook.com/api/appointments/search?phone=${encodeURIComponent(
       phone
     )}`
   )
