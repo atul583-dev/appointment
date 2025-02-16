@@ -164,3 +164,34 @@ input, select {
     gap: 10px;
     margin-bottom: 20px;
 }
+
+/* Base button style */
+.book-appointment-button {
+    background-color: #007bff; /* Solid blue background */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Compact padding */
+    font-size: 16px; /* Standard font size */
+    font-weight: 500; /* Medium font weight */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Slightly rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.2s ease; /* Smooth transition for hover */
+    display: block; /* Make it a block element */
+    margin: 0 auto; /* Center the button horizontally */
+    margin-top: 20px;
+}
+
+/* Hover effect */
+.book-appointment-button:hover {
+    background-color: #0056b3; /* Slightly darker blue on hover */
+}
+
+/* Active effect */
+.book-appointment-button:active {
+    background-color: #004080; /* Even darker blue when clicked */
+}
+
+/* Focus effect for accessibility */
+.book-appointment-button:focus {
+    outline: 2px solid rgba(0, 123, 255, 0.5); /* Highlight for keyboard navigation */
+}
