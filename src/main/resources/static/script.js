@@ -79,28 +79,34 @@ function showConfirmation(appointment) {
 
 function updateAppointmentsList() {
   const appointmentsDiv = document.getElementById('appointments');
-  appointmentsDiv.innerHTML =
-    appointments.length === 0
-      ? '<p>No appointments booked yet</p>'
-      : appointments
-          .map(
-            app => `
-      <div class="appointment-item" style="padding: 10px; margin: 10px 0; border-bottom: 1px solid #eee;">
-        <p><strong>${app.name}</strong> with ${formatDoctor(app.doctor)}</p>
-        <p>${new Date(app.date).toLocaleDateString()} at ${app.time}</p>
-      </div>
-    `
-          )
-          .join('');
+
+  // Add null check
+  if (!appointmentsDiv) {
+    console.error("Could not find element with id 'appointments'");
+    return;
+  }
+
+  appointmentsDiv.innerHTML = appointments.length === 0
+    ? '<p>No appointments booked yet</p>'
+    : appointments.map(app => `
+        <div class="appointment-item">
+          <p><strong>${app.name}</strong> with ${formatDoctor(app.doctor)}</p>
+          <p>${new Date(app.date).toLocaleDateString()} at ${app.time}</p>
+        </div>
+      `).join('');
 }
 
 async function loadAppointments() {
   try {
-    const response = await fetch('https://www.zaptobook.com/api/appointments/getAll');
+    const response = await fetch('http://localhost:8080/api/appointments/getAll');
     const data = await response.json();
     const tbody = document.getElementById('appointmentsBody');
     const noAppointments = document.getElementById('noAppointments');
 
+    if (!tbody || !noAppointments) {
+      console.error('Required elements missing!');
+      return;
+    }
     tbody.innerHTML = '';
     if (!data || data.length === 0) {
       noAppointments.style.display = 'block';
@@ -145,7 +151,7 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
   const phone = document.getElementById('phone').value;
   const date = document.getElementById('date').value;
   const time = document.getElementById('time').value;
-  const doctor = document.querySelector('input[name="doctor"]:checked')?.value;
+  const doctor = document.getElementById('doctor').value;
 
   if (!name || !phone || !date || !time || !doctor) {
     alert('Please fill all fields');
@@ -154,7 +160,7 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
 
   const appointment = { id: Date.now(), name, phone, date, time, doctor };
 
-  fetch('https://www.zaptobook.com/api/appointments', {
+  fetch('http://localhost:8080/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(appointment)
@@ -195,7 +201,7 @@ function searchAppointments() {
   resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
 
   fetch(
-    `https://www.zaptobook.com/api/appointments/search?phone=${encodeURIComponent(
+    `http://localhost:8080/api/appointments/search?phone=${encodeURIComponent(
       phone
     )}`
   )

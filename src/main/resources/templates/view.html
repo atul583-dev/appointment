@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/media/LOGO.jpeg" />
+    <title>View Appointments - Online Doctor Appointment Booking</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/view.css">
+</head>
+<body>
+<header>
+    <h1>Online Doctor Appointment Booking</h1>
+    <nav>
+        <ul>
+            <li><a href="/">Book Appointment</a></li>
+            <li><a href="/view">View Appointments</a></li>
+            <li><a href="/search">Search Appointment</a></li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <div class="card" id="appointmentsSection">
+        <h2>Booked Appointments</h2>
+
+        <table class="appointments-table">
+            <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Contact</th>
+                <th>Appointment Date</th>
+                <th>Time</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody id="appointmentsBody">
+
+            </tbody>
+        </table>
+        <div id="noAppointments" class="no-appointments" style="display: none;">
+            No appointments found
+        </div>
+
+    </div>
+</main>
+
+<script src="/js/view.js"></script>
+
+<footer>
+    <p>&copy; 2025 Online Doctor Appointment Booking | Powered by Atul Bhoyar Inc</p>
+</footer>
+</body>
+</html>

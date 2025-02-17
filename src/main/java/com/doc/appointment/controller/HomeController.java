@@ -7,12 +7,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     @GetMapping("/")
-    public String home() {
-        return "home";  // Refers to src/main/resources/templates/index.html
+    public String booking() {
+        return "booking";  // Refers to src/main/resources/templates/index.html
     }
 
-    @GetMapping("/dash")
-    public String dashboard() {
-        return "dashboard";
+    @GetMapping("/view")
+    public String view() {
+        return "view";
+    }
+
+    @GetMapping("/search")
+    public String search() {
+        return "search";
     }
 }

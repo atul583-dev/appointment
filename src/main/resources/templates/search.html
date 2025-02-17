@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/media/LOGO.jpeg" />
+    <title>Search Appointment - Online Doctor Appointment Booking</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/search.css">
+</head>
+<body>
+<header>
+    <h1>Online Doctor Appointment Booking</h1>
+    <nav>
+        <ul>
+            <li><a href="/">Book Appointment</a></li>
+            <li><a href="/view" onclick="loadAppointments()">View Appointments</a></li>
+            <li><a href="/search">Search Appointment</a></li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <div class="card">
+        <h2>Search Appointment by Phone Number</h2>
+        <label for="searchPhone">Phone Number:</label>
+        <input type="tel" id="searchPhone" placeholder="Enter phone number" name="phone" required>
+        <button value="Search" id="btnSearch" onclick="searchAppointments()">Search</button>
+
+        <div id="searchResults" class="search-results">
+            <!-- Results will be inserted here -->
+        </div>
+    </div>
+</main>
+
+<script src="/js/search.js"></script>
+
+<footer>
+    <p>&copy; 2025 Online Doctor Appointment Booking | Powered by Atul Bhoyar Inc</p>
+</footer>
+</body>
+</html>

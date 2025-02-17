@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/media/LOGO.jpeg" />
+    <title>Book Appointment - Online Doctor Appointment Booking</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/booking.css">
+</head>
+<body>
+<header>
+    <h1>Online Doctor Appointment Booking</h1>
+    <nav>
+        <ul>
+            <li><a href="/">Book Appointment</a></li>
+            <li><a href="/view">View Appointments</a></li>
+            <li><a href="/search">Search Appointment</a></li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <div class="card">
+        <h2>Book an Appointment</h2>
+        <form id="bookingForm">
+            <label for="doctor">Select Doctor:</label>
+            <select name="doctor" id="doctor" required>
+                <option value="">-- Select a doctor --</option>
+                <option value="dr_smith">Dr. Smith</option>
+                <option value="dr_jones">Dr. Jones</option>
+                <option value="dr_brown">Dr. Brown</option>
+            </select>
+
+            <label for="date">Appointment Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Appointment Time:</label>
+            <input type="time" id="time" name="time" required step="1800">
+
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" required>
+
+
+
+            <input type="submit" value="Book Appointment">
+        </form>
+    </div>
+</main>
+<script src="/js/booking.js"></script>
+
+<footer>
+    <p>&copy; 2025 Online Doctor Appointment Booking | Powered by Atul Bhoyar Inc</p>
+</footer>
+</body>
+</html>
