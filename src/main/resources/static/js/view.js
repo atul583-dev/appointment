@@ -1,7 +1,7 @@
 async function loadAppointments() {
 
     try {
-        const response = await fetch('https://www.zaptobook.com/api/appointments/getAll');
+        const response = await fetch('http://localhost:8080/api/appointments/getAll');
         const data = await response.json();
         console.log("DATA", data);
         const tbody = document.getElementById('appointmentsBody');
