@@ -9,6 +9,31 @@ function loadAppointments() {
       if (!tbody || !noAppointments) {
         console.error('Required elements missing!');
         return;
+
+    try {
+        const response = await fetch('https://www.zaptobook.com/api/appointments/getAll');
+        const data = await response.json();
+        console.log("DATA", data);
+        const tbody = document.getElementById('appointmentsBody');
+        const noAppointments = document.getElementById('noAppointments');
+
+        if (!tbody || !noAppointments) {
+              console.error('Required elements missing!');
+              return;
+            }
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+              noAppointments.style.display = 'block';
+            } else {
+              noAppointments.style.display = 'none';
+              data.forEach(appointment => {
+                const row = document.createElement('tr');
+                row.innerHTML = getAppointmentRowHTML(appointment);
+                tbody.appendChild(row);
+              });
+            }
+      } catch (error) {
+        console.error('Error loading appointments:', error);
       }
 
       tbody.innerHTML = '';
