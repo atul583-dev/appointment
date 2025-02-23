@@ -1,41 +1,45 @@
-async function loadAppointments() {
+function loadAppointments() {
+  fetch('https://www.zaptobook.com/api/appointments/getAll')
+    .then(response => response.json())
+    .then(data => {
+      console.log("DATA", data);
+      const tbody = document.getElementById('appointmentsBody');
+      const noAppointments = document.getElementById('noAppointments');
 
-    try {
-        const response = await fetch('http://localhost:8080/api/appointments/getAll');
-        const data = await response.json();
-        console.log("DATA", data);
-        const tbody = document.getElementById('appointmentsBody');
-        const noAppointments = document.getElementById('noAppointments');
-
-        if (!tbody || !noAppointments) {
-              console.error('Required elements missing!');
-              return;
-            }
-            tbody.innerHTML = '';
-            if (!data || data.length === 0) {
-              noAppointments.style.display = 'block';
-            } else {
-              noAppointments.style.display = 'none';
-              data.forEach(appointment => {
-                const row = document.createElement('tr');
-                row.innerHTML = getAppointmentRowHTML(appointment);
-                tbody.appendChild(row);
-              });
-            }
-      } catch (error) {
-        console.error('Error loading appointments:', error);
+      if (!tbody || !noAppointments) {
+        console.error('Required elements missing!');
+        return;
       }
+
+      tbody.innerHTML = '';
+      if (!data || data.length === 0) {
+        noAppointments.style.display = 'block';
+      } else {
+        noAppointments.style.display = 'none';
+        data.forEach(appointment => {
+          const row = document.createElement('tr');
+          row.innerHTML = getAppointmentRowHTML(appointment);
+          tbody.appendChild(row);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error loading appointments:', error);
+    });
 }
 
 function getAppointmentRowHTML(appointment) {
-    console.log("Status = ", appointment);
-    return `
-      <td>${appointment.name}</td>
-      <td>${appointment.phone}</td>
-      <td>${appointment.date}</td>
-      <td>${appointment.time}</td>
-      <td>${appointment.status}</td>
-    `;
+
+  const appointmentDate = new Date(`${appointment.date} ${appointment.time}`);
+  const now = new Date();
+  const status = appointmentDate < now ? "Completed" : "Upcoming";
+  return `
+    <td>${appointment.name}</td>
+    <td>${appointment.phone}</td>
+    <td>${appointment.date}</td>
+    <td>${appointment.time}</td>
+    <td>${status}</td>
+  `;
 }
 
 window.onload = loadAppointments;

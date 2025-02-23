@@ -58,6 +58,10 @@
       font-size: 1.75rem;
       color: #333;
     }
+    #appointmentsSection {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -82,11 +86,16 @@
       margin-top: 20px;
     }
     footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
       text-align: center;
-      padding: 20px;
+      padding: 7px;
       background: #f8f8f8;
       font-size: 0.9rem;
-      color: #777;
+      background-color: rgba(4, 173, 131, 0.1);
+      color: #04ad83;
     }
 
     /* Responsive Styles */

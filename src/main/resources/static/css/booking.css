@@ -90,11 +90,16 @@
     }
     form input[type="submit"]:hover { background: #039e72; }
     footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
       text-align: center;
-      padding: 20px;
+      padding: 7px;
       background: #f8f8f8;
       font-size: 0.9rem;
-      color: #777;
+      background-color: rgba(4, 173, 131, 0.1);
+      color: #04ad83;
     }
 
     /* Responsive Styles */

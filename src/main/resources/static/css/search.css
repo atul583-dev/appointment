@@ -91,12 +91,16 @@
     #btnSearch:hover { background: #039e72; }
     #searchResults { margin-top: 20px; }
     footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
       text-align: center;
       padding: 7px;
       background: #f8f8f8;
       font-size: 0.9rem;
       background-color: rgba(4, 173, 131, 0.1);
-            color: #04ad83;
+      color: #04ad83;
     }
 
     /* Responsive Styles */

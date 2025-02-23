@@ -12,7 +12,7 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
     return;
   }
 
-  const appointment = { id: Date.now(), name, phone, date, time, doctor };
+  const appointment = { id: Date.now(), name, phone, date, time, doctor, status };
 
   fetch('https://www.zaptobook.com/api/appointments', {
     method: 'POST',
