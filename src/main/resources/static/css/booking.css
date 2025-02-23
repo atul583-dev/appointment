@@ -115,3 +115,46 @@
       header h1 { font-size: 1.2rem; }
       .card h2 { font-size: 1.5rem; }
     }
+    /* popup.css */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background-color: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-content p {
+      margin: 0 0 20px;
+      font-size: 16px;
+    }
+
+    .popup-content button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      border: none;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup-content button:hover {
+      background-color: #218838;
+    }
+
+    .hidden {
+      display: none;
+    }

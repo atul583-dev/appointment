@@ -29,13 +29,16 @@ function searchAppointments() {
 
       const resultItem = document.createElement('div');
       resultItem.className = 'result-item';
+      const appointmentDate = new Date(`${appointment.date} ${appointment.time}`);
+      const now = new Date();
+      const status = appointmentDate < now ? "Completed" : "Upcoming";
       resultItem.innerHTML = `
         <h4>${appointment.name}</h4>
         <div class="details">
           <p>Doctor: ${(appointment.doctor)}</p>
           <p>Date: ${appointment.date}</p>
           <p>Time: ${appointment.time}</p>
-          <p>Status: ${appointment.status}</p>
+          <p>Status: ${status}</p>
         </div>
       `;
       resultsContainer.appendChild(resultItem);

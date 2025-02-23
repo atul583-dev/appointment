@@ -18,21 +18,17 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(appointment)
-  })
-    .then(handleFetchResponse)
-    .then(data => {
-      appointments.push(data);
-      showConfirmation(data);
-      updateAppointmentsList();
-      this.reset();
-      clearDoctorSelection();
-      if (
-        document
-          .getElementById('appointmentsSection')
-          .classList.contains('active')
-      ) {
-        loadAppointments();
-      }
+  }).then(data => {
+      const popup = document.getElementById('popupConfirmation');
+      popup.classList.remove('hidden');
+
+      document.getElementById('bookingForm').reset();
+
+      document.getElementById('closePopup').addEventListener('click', function() {
+        popup.classList.add('hidden');
+      });
+
+      document.getElementById('bookingForm').reset();
     })
     .catch(error => {
       console.error('Error:', error);
